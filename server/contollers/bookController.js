@@ -1,17 +1,21 @@
 const { Book } = require("../models/bookModel");
 
 const getAllBooks = async (req, res) => {
-  const genre = req.query.genre || "";
   const p = req.query.p || null;
-  const booksPerPage = 5;
-  // const filter = { geners: { $elemMatch: { $eq: genre } } };
+  const numBooksPerPage = 5;
   try {
     let query = Book.find().sort({ title: 1 });
-    if (p !== null) {
-      query = query.skip(booksPerPage * p).limit(booksPerPage);
+    if (p) {
+      query = query.skip(numBooksPerPage * p).limit(numBooksPerPage);
     }
-    const books = await query.exec();
-    return res.status(200).json(books);
+    const booksPerPage = await query.exec();
+    const allBook = await Book.find();
+    return res.status(200).json({
+      data: booksPerPage,
+      currentPage: p ? p : "none",
+      dataLimit: p ? numBooksPerPage : "no limit",
+      moreData: !!p && allBook.length - numBooksPerPage * (p + 1) > 0,
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json({ mssge: err });
@@ -24,8 +28,26 @@ const getBookById = async (req, res) => {
     const book = await Book.findById(id);
     return book
       ? res.status(200).json(book)
-      : res.status(404).json({ mssge: "not found" });
+      : res.status(404).json({ mssge: "Not found" });
   } catch (err) {
+    res.status(500).json({ mssge: err });
+  }
+};
+
+const getBookBytitle = async (req, res) => {
+  const searchWord = req.params.searchWord;
+  console.log(searchWord);
+  try {
+    const book = await Book.find({
+      title: { $regex: searchWord, $options: "i" },
+    });
+    console.log(book);
+
+    return book
+      ? res.status(200).json(book)
+      : res.status(404).json({ mssge: "Not found" });
+  } catch (err) {
+    console.log(err);
     res.status(500).json({ mssge: err });
   }
 };
@@ -68,6 +90,7 @@ const updateBook = async (req, res) => {
 module.exports = {
   getAllBooks,
   getBookById,
+  getBookBytitle,
   addBook,
   deleteBook,
   updateBook,

@@ -1,9 +1,9 @@
 import Cookies from "js-cookie";
-import React, { useEffect } from "react";
 import useSWR from "swr";
 import { Axios } from "../api/axios";
 import BookSlide from "../components/BookSlide";
 import Layout from "../components/Layout";
+import Link from "next/link";
 
 const token = Cookies.get("token") || "";
 
@@ -25,7 +25,17 @@ const Favourite = () => {
   if (isLoading) {
     return <h1>Loading....</h1>;
   }
-  console.log(data);
+  if (!token) {
+    return (
+      <div className="min-h-[80vh] my-6 mx-auto flex flex-col items-center justify-center gap-4">
+        <h1 className="text-3xl">Authentication Required</h1>
+        <p className="text-xl">Please log in to access this page.</p>
+        <Link href="/login" className="w-fit btn-primary cursor-pointer">
+          Login
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen items-center bg-white mt-[70px] mb-[40px]">

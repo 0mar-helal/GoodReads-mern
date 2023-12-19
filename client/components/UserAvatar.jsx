@@ -3,6 +3,7 @@ import { getInitials } from "../utils/functions";
 import Cookies from "js-cookie";
 import { Axios } from "../api/axios";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const UserAvatar = ({ token, setToken }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,6 +15,7 @@ const UserAvatar = ({ token, setToken }) => {
     : "";
   const handleLogout = async () => {
     try {
+      toast.loading("Waiting...");
       setIsLoading(true);
       const res = await Axios.post("logout", { token });
       Cookies.remove("token");

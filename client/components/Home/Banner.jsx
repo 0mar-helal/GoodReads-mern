@@ -4,7 +4,7 @@ import SearchBar from "../SearchBar";
 const Banner = () => {
   return (
     <>
-      <div className=" bg-teal-100 pt-[70px] pb-[50px]">
+      <div className=" bg-teal-100 pt-[70px]">
         <div className="mx-auto w-full lg:px-[80px] px-12 flex flex-col md:flex-row justify-between gap-12">
           <div className="md:w-1/2 w-full flex flex-col gap-8">
             {/* header and text */}
@@ -19,7 +19,7 @@ const Banner = () => {
               media groups can also be a source for great deals.
             </p>
             {/* Search bar */}
-            <SearchBar />
+            <SearchBar type="outsideSearchPage" />
           </div>
           <div className="md:w-1/2 w-full">
             <BannerSlider />

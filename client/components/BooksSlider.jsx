@@ -8,14 +8,15 @@ import useSWR from "swr";
 import BookSlide from "./BookSlide";
 import { Axios } from "../api/axios";
 import Cookies from "js-cookie";
+import BookSlideSkelton from "./BookSlideSkelton";
 
 const token = Cookies.get("token") || "";
 
 const fetcher = async (pageIndex) => {
   try {
-    const res = await Axios(pageIndex);
+    const res = await Axios(pageIndex.url);
     console.log(res);
-    return res.data;
+    return res.data.data;
   } catch (error) {
     console.log(error);
   }
@@ -37,13 +38,17 @@ const fetcherFav = async () => {
 
 const BooksSlider = ({ page }) => {
   const { data: dataFav, isLoading: isLoadingFav } = useSWR(
-    `user/favourite_book`,
+    token ? `user/favourite_book` : null,
     fetcherFav
   );
-  const { data, isLoading } = useSWR(`/books?p=${page}`, fetcher);
+  const { data, isLoading } = useSWR(
+    { url: `/books?p=${page}`, page: "home" },
+    fetcher
+  );
 
-  if (isLoading || isLoadingFav) {
-    return <h1>Loading...</h1>;
+  let listOfSkelton = [];
+  for (let i = 0; i < 5; i++) {
+    listOfSkelton.push(<BookSlideSkelton />);
   }
   return (
     <Swiper
@@ -69,14 +74,16 @@ const BooksSlider = ({ page }) => {
       modules={[Pagination]}
       className="books-swiper"
     >
-      {data?.map((book) => (
-        <SwiperSlide key={book._id}>
-          <BookSlide
-            book={book}
-            Fav={dataFav?.find((favBook) => favBook._id === book._id)}
-          />
-        </SwiperSlide>
-      ))}
+      {isLoading || isLoadingFav
+        ? listOfSkelton.map((skelton) => <SwiperSlide>{skelton}</SwiperSlide>)
+        : data?.map((book) => (
+            <SwiperSlide key={book._id}>
+              <BookSlide
+                book={book}
+                Fav={dataFav?.find((favBook) => favBook._id === book._id)}
+              />
+            </SwiperSlide>
+          ))}
     </Swiper>
   );
 };

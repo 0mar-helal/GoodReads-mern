@@ -14,21 +14,30 @@ const BookSlide = ({ book, Fav }) => {
   const [isFav, setIsFav] = useState(Fav);
   const router = useRouter();
   const token = Cookies.get("token") || "";
-  const { id, title, author, imageURL, rating } = book;
+  const { _id, title, author, imageURL, rating } = book;
   const addToFavourite = async () => {
-    setIsFav(true);
-    try {
-      const res = await Axios.post("user/favourite_book/add", book, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token,
-        },
+    if (token) {
+      setIsFav(true);
+      try {
+        const res = await Axios.post("user/favourite_book/add", book, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+        });
+        console.log(res);
+        toast.success(res.data.mssge);
+      } catch (err) {
+        console.log(err);
+        toast.error(err?.response?.data.mssge);
+      }
+    } else {
+      toast.error("You have to login first!", {
+        duration: 2000,
       });
-      console.log(res);
-      toast.success(res.data.mssge);
-    } catch (err) {
-      console.log(err);
-      toast.error(err?.response?.data.mssge);
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
     }
   };
   const removeFromFavourite = async () => {
@@ -60,7 +69,7 @@ const BookSlide = ({ book, Fav }) => {
           {isFav ? <GoHeartFill /> : <GoHeart />}
         </button>
         <img
-          onClick={() => router.push(`/book/show/${id}`)}
+          onClick={() => router.push(`/book/show/${_id}`)}
           src={imageURL}
           className="block w-full h-full object-cover cursor-pointer hover:scale-105 transition-all"
           alt=""
@@ -68,7 +77,7 @@ const BookSlide = ({ book, Fav }) => {
       </div>
       <div className="w-full flex flex-col text-left gap-2 text-[15px]">
         <h1
-          onClick={() => router.push(`/book/show/${id}`)}
+          onClick={() => router.push(`/book/show/${_id}`)}
           className="w-fit hover:text-blue-700 hover:underline transition-all cursor-pointer"
         >
           {title}

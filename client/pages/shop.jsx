@@ -4,13 +4,13 @@ import { Axios } from "../api/axios";
 import BookCard from "../components/BookCard";
 import Layout from "../components/Layout";
 import Cookies from "js-cookie";
+import BookCardSkelton from "../components/BookCardSkelton";
 
 const token = Cookies.get("token") || "";
 
 const fetcher = async (pageIndex) => {
   try {
-    const res = await Axios(pageIndex);
-    console.log(res);
+    const res = await Axios(pageIndex.url);
     return res.data;
   } catch (error) {
     console.log(error);
@@ -32,16 +32,23 @@ const fetcherFav = async () => {
 };
 const Page = ({ index }) => {
   const { data: dataFav, isLoading: isLoadingFav } = useSWR(
-    `user/favourite_book`,
+    token ? `user/favourite_book` : null,
     fetcherFav
   );
-  const { data, isLoading } = useSWR(`/books?p=${index}`, fetcher);
+  const { data, isLoading } = useSWR(
+    { url: `/books?p=${index}`, page: "shop" },
+    fetcher
+  );
 
   if (isLoading || isLoadingFav) {
-    return <h1>Loading...</h1>;
+    let listOfSkelton = [];
+    for (let i = 0; i < 5; i++) {
+      listOfSkelton.push(<BookCardSkelton />);
+    }
+    return listOfSkelton.map((skelton) => skelton);
   }
 
-  return data?.map((book) => (
+  return data.data.map((book) => (
     <BookCard
       key={book._id}
       book={book}
@@ -56,18 +63,22 @@ const Shop = () => {
   for (let i = 0; i < page + 1; i++) {
     pages.push(<Page index={i} key={i} />);
   }
+  const { data } = useSWR({ url: `/books?p=${page}`, page: "shop" }, fetcher);
+
   return (
-    <div className="min-h-screen items-center bg-white mt-[70px] mb-[40px]">
+    <div className="min-h-screen mt-[70px] mb-[40px]">
       <h1 className="my-heading">All Books Are Here</h1>
       <div className="px-6 md:px-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6 mb-12">
         {pages}
       </div>
-      <button
-        className="block border-none outline-none bg-blue-700 text-white font-bold px-4 py-2 rounded w-max mx-auto"
-        onClick={() => setPage(page + 1)}
-      >
-        Load More
-      </button>
+      {data?.moreData ? (
+        <button
+          className="block border-none outline-none bg-blue-700 text-white font-bold px-4 py-2 rounded w-max mx-auto"
+          onClick={() => setPage(page + 1)}
+        >
+          Load More
+        </button>
+      ) : null}
     </div>
   );
 };

@@ -17,19 +17,28 @@ const BookCard = ({ book, Fav }) => {
   const [isFav, setIsFav] = useState(Fav);
 
   const addToFavourite = async () => {
-    setIsFav(true);
-    try {
-      const res = await Axios.post("user/favourite_book/add", book, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token,
-        },
+    if (token) {
+      setIsFav(true);
+      try {
+        const res = await Axios.post("user/favourite_book/add", book, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+        });
+        console.log(res);
+        toast.success(res.data.mssge);
+      } catch (err) {
+        console.log(err);
+        toast.error(err?.response?.data.mssge);
+      }
+    } else {
+      toast.error("You have to login first!", {
+        duration: 2000,
       });
-      console.log(res);
-      toast.success(res.data.mssge);
-    } catch (err) {
-      console.log(err);
-      toast.error(err?.response?.data.mssge);
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
     }
   };
   const removeFromFavourite = async () => {

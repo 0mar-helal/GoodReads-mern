@@ -5,6 +5,7 @@ const {
   deleteBook,
   updateBook,
   getAllBooks,
+  getBookBytitle,
 } = require("../contollers/bookController");
 
 const bookRouter = Router();
@@ -12,6 +13,8 @@ const bookRouter = Router();
 bookRouter.get("/", getAllBooks);
 
 bookRouter.get("/:id", getBookById);
+
+bookRouter.get("/search/:searchWord", getBookBytitle);
 
 bookRouter.post("/", addBook);
 
